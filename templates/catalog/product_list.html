@@ -5,24 +5,57 @@
 {% block content %}
 <div class="row">
     <!-- Сайдбар с фильтрами -->
-    <div class="col-md-3">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Фильтры</h5>
-            </div>
-            <div class="card-body">
-                <form method="get" id="filter-form">
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-success w-100">Применить</button>
-                    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
-                </form>
+<div class="col-md-3">
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-funnel me-2"></i>Фильтры
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="filter-form">
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label small fw-bold text-muted">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-check-lg me-1"></i>Применить
+                </button>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Сбросить
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Категории -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-grid me-2"></i>Категории
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                <a href="{% url 'catalog:product_list' %}"
+                   class="list-group-item list-group-item-action border-0 {% if not current_category %}active{% endif %}">
+                    <i class="bi bi-grid-3x3 me-2"></i>Все товары
+                </a>
+                {% for category in categories %}
+                    <a href="{% url 'catalog:category' category.slug %}"
+                       class="list-group-item list-group-item-action border-0 {% if current_category and current_category.slug == category.slug %}active{% endif %}">
+                        <i class="bi bi-flower1 me-2"></i>{{ category.name }}
+                        <span class="badge bg-success rounded-pill float-end">{{ category.products.count }}</span>
+                    </a>
+                {% endfor %}
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Категории -->
 <div class="list-group list-group-flush">
@@ -52,40 +85,56 @@
             </ol>
         </nav>
 
-        <!-- Заголовок и количество -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-                {% if current_category %}
-                    {{ current_category.name }}
-                {% else %}
-                    Все товары
-                {% endif %}
-            </h1>
-            <span class="text-muted">Найдено: {{ products.count }} товаров</span>
-        </div>
-
-        <!-- Сетка товаров -->
-        {% if products %}
-            <div class="row">
-                {% for product in products %}
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        {% include "catalog/includes/_product_card.html" %}
-                    </div>
-                {% endfor %}
-            </div>
-
-            <!-- Пагинация -->
-            {% if is_paginated %}
-                {% include "catalog/includes/_pagination.html" %}
+       <!-- Заголовок и количество -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            {% if current_category %}
+                {{ current_category.name }}
+            {% else %}
+                Все товары
             {% endif %}
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-search display-1 text-muted"></i>
-                <h3 class="text-muted">Товары не найдены</h3>
-                <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
-                <a href="{% url 'catalog:product_list' %}" class="btn btn-success">Показать все товары</a>
-            </div>
-        {% endif %}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if current_category and current_category.description %}
+                {{ current_category.description }}
+            {% else %}
+                Широкий выбор цветов и букетов для любого повода
+            {% endif %}
+        </p>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-2">
+            <i class="bi bi-box-seam me-1"></i>Найдено: {{ products.count }} товаров
+        </span>
     </div>
 </div>
+
+      <!-- Сетка товаров -->
+{% if products %}
+    <div class="row g-3">  <!-- Добавлен g-3 для равномерных отступов -->
+        {% for product in products %}
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">  <!-- Добавлены breakpoints -->
+                {% include "catalog/includes/_product_card.html" %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+        <div class="mt-5">
+            {% include "catalog/includes/_pagination.html" %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-search display-1 text-muted"></i>
+        <h3 class="text-muted mt-3">Товары не найдены</h3>
+        <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn btn-success mt-2">
+            <i class="bi bi-arrow-clockwise me-1"></i>Показать все товары
+        </a>
+    </div>
+{% endif %}
+
 {% endblock %}
