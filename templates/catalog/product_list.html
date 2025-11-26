@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог товаров - Доставка цветов{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Сайдбар с фильтрами -->
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Фильтры</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" id="filter-form">
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-success w-100">Применить</button>
+                    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Категории -->
+<div class="list-group list-group-flush">
+    <a href="{% url 'catalog:product_list' %}"
+       class="list-group-item list-group-item-action {% if not current_category %}active{% endif %}">
+        Все товары
+    </a>
+    {% for category in categories %}
+        <a href="{% url 'catalog:category' category.slug %}"
+           class="list-group-item list-group-item-action {% if current_category and current_category.slug == category.slug %}active{% endif %}">
+            {{ category.name }}
+        </a>
+    {% endfor %}
+</div>
+
+    <!-- Основной контент -->
+    <div class="col-md-9">
+        <!-- Хлебные крошки -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Главная</a></li>
+                {% if current_category %}
+                    <li class="breadcrumb-item active">{{ current_category.name }}</li>
+                {% else %}
+                    <li class="breadcrumb-item active">Все товары</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        <!-- Заголовок и количество -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                {% if current_category %}
+                    {{ current_category.name }}
+                {% else %}
+                    Все товары
+                {% endif %}
+            </h1>
+            <span class="text-muted">Найдено: {{ products.count }} товаров</span>
+        </div>
+
+        <!-- Сетка товаров -->
+        {% if products %}
+            <div class="row">
+                {% for product in products %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {% include "catalog/includes/_product_card.html" %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if is_paginated %}
+                {% include "catalog/includes/_pagination.html" %}
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h3 class="text-muted">Товары не найдены</h3>
+                <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-success">Показать все товары</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
