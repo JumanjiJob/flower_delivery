@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Заказ #{{ order.id }} - Доставка цветов{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'orders:order_list' %}">Мои заказы</a></li>
+                <li class="breadcrumb-item active">Заказ #{{ order.id }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Заказ #{{ order.id }}</h1>
+            <span class="badge {{ order.get_status_display_class }} fs-6">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Состав заказа</h5>
+            </div>
+            <div class="card-body">
+                {% for item in order.items.all %}
+                    <div class="row align-items-center mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="col-md-2">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 60px;">
+                                    <i class="bi bi-flower1 text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="card-title mb-1">{{ item.product.name }}</h6>
+                            <p class="text-muted small mb-0">{{ item.product.category.name }}</p>
+                        </div>
+
+                        <div class="col-md-2 text-center">
+                            <span class="text-muted">x{{ item.quantity }}</span>
+                        </div>
+
+                        <div class="col-md-2 text-end">
+                            <span class="fw-medium">{{ item.get_cost }} ₽</span>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div class="row mt-4">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Товары:</span>
+                            <span>{{ order.total_price }} ₽</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Доставка:</span>
+                            <span class="text-success">Бесплатно</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Итого:</span>
+                            <span class="text-success">{{ order.total_price }} ₽</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Информация о доставке</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Имя:</strong> {{ order.customer_name }}</p>
+                <p><strong>Телефон:</strong> {{ order.customer_phone }}</p>
+                {% if order.customer_email %}
+                    <p><strong>Email:</strong> {{ order.customer_email }}</p>
+                {% endif %}
+                <p><strong>Адрес:</strong> {{ order.delivery_address }}</p>
+                <p><strong>Время доставки:</strong> {{ order.delivery_time|date:"d.m.Y H:i" }}</p>
+                <p><strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}</p>
+
+                {% if order.comment %}
+                    <p><strong>Комментарий:</strong> {{ order.comment }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted small mb-3">
+                    Если у вас есть вопросы по заказу, свяжитесь с нами
+                </p>
+                <a href="tel:+79999999999" class="btn btn-outline-success w-100 mb-2">
+                    <i class="bi bi-telephone me-2"></i>+7 (999) 999-99-99
+                </a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-success w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Вернуться к покупкам
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа - Доставка цветов{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Каталог</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'orders:cart_detail' %}">Корзина</a></li>
+                <li class="breadcrumb-item active">Оформление заказа</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-4">Оформление заказа</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">Данные для доставки</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="order-form">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.customer_name.id_for_label }}" class="form-label">
+                                {{ form.customer_name.label }} *
+                            </label>
+                            {{ form.customer_name }}
+                            {% if form.customer_name.errors %}
+                                <div class="text-danger small">{{ form.customer_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.customer_phone.id_for_label }}" class="form-label">
+                                {{ form.customer_phone.label }} *
+                            </label>
+                            {{ form.customer_phone }}
+                            {% if form.customer_phone.errors %}
+                                <div class="text-danger small">{{ form.customer_phone.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.customer_email.id_for_label }}" class="form-label">
+                            {{ form.customer_email.label }}
+                        </label>
+                        {{ form.customer_email }}
+                        {% if form.customer_email.errors %}
+                            <div class="text-danger small">{{ form.customer_email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.delivery_address.id_for_label }}" class="form-label">
+                            {{ form.delivery_address.label }} *
+                        </label>
+                        {{ form.delivery_address }}
+                        {% if form.delivery_address.errors %}
+                            <div class="text-danger small">{{ form.delivery_address.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.delivery_time.id_for_label }}" class="form-label">
+                                {{ form.delivery_time.label }} *
+                            </label>
+                            {{ form.delivery_time }}
+                            {% if form.delivery_time.errors %}
+                                <div class="text-danger small">{{ form.delivery_time.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_method.id_for_label }}" class="form-label">
+                                {{ form.payment_method.label }} *
+                            </label>
+                            {{ form.payment_method }}
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger small">{{ form.payment_method.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.comment.id_for_label }}" class="form-label">
+                            {{ form.comment.label }}
+                        </label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}
+                            <div class="text-danger small">{{ form.comment.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agree-terms" required>
+                        <label class="form-check-label small" for="agree-terms">
+                            Я согласен с <a href="#" class="text-decoration-none">условиями обработки персональных данных</a> *
+                        </label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Подтвердить заказ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Ваш заказ</h5>
+            </div>
+            <div class="card-body">
+                {% for item in cart %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="fw-medium">{{ item.product.name }}</span>
+                            <small class="text-muted d-block">x{{ item.quantity }}</small>
+                        </div>
+                        <span>{{ item.total_price }} ₽</span>
+                    </div>
+                {% endfor %}
+
+                <hr>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Доставка</span>
+                    <span class="text-success">Бесплатно</span>
+                </div>
+
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>Итого</span>
+                    <span class="text-success">{{ cart.get_total_price }} ₽</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                <h6 class="card-title">Информация о доставке</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li class="mb-2"><i class="bi bi-clock me-2"></i>Доставка в удобное для вас время</li>
+                    <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Бесплатная доставка по городу</li>
+                    <li class="mb-2"><i class="bi bi-telephone me-2"></i>Свяжемся для подтверждения</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Установка минимальной даты доставки (завтра)
+        const deliveryTimeInput = document.getElementById('{{ form.delivery_time.id_for_label }}');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(10, 0, 0, 0);
+
+        const minDate = tomorrow.toISOString().slice(0, 16);
+        deliveryTimeInput.min = minDate;
+
+        // Валидация формы
+        const orderForm = document.getElementById('order-form');
+        const agreeCheckbox = document.getElementById('agree-terms');
+
+        orderForm.addEventListener('submit', function(e) {
+            if (!agreeCheckbox.checked) {
+                e.preventDefault();
+                alert('Пожалуйста, согласитесь с условиями обработки персональных данных');
+                agreeCheckbox.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}
