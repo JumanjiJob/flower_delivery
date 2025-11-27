@@ -3,21 +3,23 @@ from django.contrib.auth.models import User
 from catalog.models import Product
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from django.urls import reverse
 
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('new', 'Новый'),
-        ('confirmed', 'Подтвержден'),
-        ('in_progress', 'В процессе доставки'),
-        ('delivered', 'Доставлен'),
-        ('cancelled', 'Отменен'),
+        ('new', '🆕 Новый'),
+        ('confirmed', '✅ Подтвержден'),
+        ('processing', '🔧 Обработан'),
+        ('in_progress', '🚚 Доставляется'),
+        ('delivered', '📦 Доставлен'),
+        ('cancelled', '❌ Отменен'),
     ]
 
     PAYMENT_CHOICES = [
-        ('cash', 'Наличные при получении'),
-        ('card', 'Онлайн оплата картой'),
-        ('transfer', 'Банковский перевод'),
+        ('cash', '💵 Наличные при получении'),
+        ('card', '💳 Онлайн оплата картой'),
+        ('transfer', '🏦 Банковский перевод'),
     ]
 
     user = models.ForeignKey(
@@ -36,6 +38,10 @@ class Order(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
     )
     status = models.CharField(
         max_length=20,
@@ -66,9 +72,17 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['user']),
+        ]
 
     def __str__(self):
         return f"Заказ #{self.id} - {self.customer_name}"
+
+    def get_absolute_url(self):
+        return reverse('orders:order_detail', kwargs={'order_id': self.id})
 
     def update_total_price(self):
         """Обновляет общую стоимость заказа"""
@@ -81,11 +95,36 @@ class Order(models.Model):
         status_classes = {
             'new': 'bg-secondary',
             'confirmed': 'bg-primary',
+            'processing': 'bg-info',
             'in_progress': 'bg-warning',
             'delivered': 'bg-success',
             'cancelled': 'bg-danger',
         }
         return status_classes.get(self.status, 'bg-secondary')
+
+    def get_status_timeline(self):
+        """Возвращает временную шкалу статусов"""
+        timeline = []
+        status_flow = ['new', 'confirmed', 'processing', 'in_progress', 'delivered']
+
+        for status in status_flow:
+            timeline.append({
+                'status': status,
+                'name': dict(self.STATUS_CHOICES)[status],
+                'active': status == self.status,
+                'completed': status_flow.index(status) < status_flow.index(
+                    self.status) if self.status in status_flow else False
+            })
+
+        return timeline
+
+    def can_be_cancelled(self):
+        """Можно ли отменить заказ"""
+        return self.status in ['new', 'confirmed', 'processing']
+
+    def get_items_count(self):
+        """Возвращает общее количество товаров в заказе"""
+        return sum(item.quantity for item in self.items.all())
 
 
 class OrderItem(models.Model):

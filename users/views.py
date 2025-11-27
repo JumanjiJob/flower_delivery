@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
+from orders.models import Order
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 
 
@@ -29,6 +30,22 @@ def register(request):
 
 @login_required
 def profile(request):
+    """Личный кабинет пользователя"""
+    # Получаем статистику заказов пользователя
+    orders = Order.objects.filter(user=request.user)
+    orders_stats = {
+        'total': orders.count(),
+        'new': orders.filter(status='new').count(),
+        'confirmed': orders.filter(status='confirmed').count(),
+        'processing': orders.filter(status='processing').count(),
+        'in_progress': orders.filter(status='in_progress').count(),
+        'delivered': orders.filter(status='delivered').count(),
+        'cancelled': orders.filter(status='cancelled').count(),
+    }
+
+    # Последние заказы
+    recent_orders = orders.order_by('-created_at')[:5]
+
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(
@@ -49,10 +66,53 @@ def profile(request):
 
     context = {
         'user_form': user_form,
-        'profile_form': profile_form
+        'profile_form': profile_form,
+        'orders_stats': orders_stats,
+        'recent_orders': recent_orders,
     }
 
     return render(request, 'users/profile.html', context)
+
+
+@login_required
+def order_history(request):
+    """Полная история заказов пользователя"""
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+
+    # Фильтрация по статусу
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+
+    context = {
+        'orders': orders,
+        'status_filter': status_filter,
+    }
+
+    return render(request, 'users/order_history.html', context)
+
+
+@login_required
+def home(request):
+    """Домашняя страница для авторизованных пользователей"""
+    # Получаем статистику для быстрого обзора
+    orders = Order.objects.filter(user=request.user)
+    recent_orders = orders.order_by('-created_at')[:3]
+
+    context = {
+        'recent_orders': recent_orders,
+        'total_orders': orders.count(),
+        'active_orders': orders.exclude(status__in=['delivered', 'cancelled']).count(),
+    }
+
+    return render(request, 'users/home.html', context)
+
+
+def landing(request):
+    """Главная страница для неавторизованных пользователей"""
+    if request.user.is_authenticated:
+        return redirect('home')
+    return render(request, 'users/landing.html')
 
 
 class CustomLoginView(LoginView):
