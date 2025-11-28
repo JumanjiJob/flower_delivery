@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+TELEGRAM_BOT_TOKEN = '8386251854:AAG4gtQpxbf-LU1XSpoxMwxW6kYzwMGWFxc'
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'ваш-секретный-ключ'  # Замените в продакшене!
