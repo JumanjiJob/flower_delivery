@@ -68,6 +68,12 @@ class Order(models.Model):
         verbose_name='Общая стоимость'
     )
 
+    telegram_chat_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='ID чата Telegram для уведомлений'
+    )
+
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'

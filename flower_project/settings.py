@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-TELEGRAM_BOT_TOKEN = 'Ваш токен'
+TELEGRAM_BOT_TOKEN = 'Токен бота'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
