@@ -70,4 +70,5 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('catalog:category', kwargs={'category_slug': self.slug})
+        """Возвращает URL детальной страницы товара"""
+        return reverse('catalog:product_detail', kwargs={'slug': self.slug})

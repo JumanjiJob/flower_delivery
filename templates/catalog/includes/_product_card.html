@@ -39,7 +39,7 @@
             </div>
 
             <!-- Кнопка -->
-            <a href="{{ product.get_absolute_url }}" class="btn btn-success w-100 mt-3">
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-success w-100 mt-3">
                 <i class="bi bi-eye me-1"></i>Подробнее
             </a>
             <!-- форма для добавления в корзину -->
@@ -67,7 +67,11 @@
                             </button>
                         </form>
                     {% endif %}
-                    <a href="{{ product.get_absolute_url }}" class="btn btn-outline-secondary">
+                    {% if product.slug %}
+    <a href="{{ product.get_absolute_url }}" class="btn btn-outline-secondary">
+{% else %}
+    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary">
+{% endif %}
                         <i class="bi bi-eye me-1"></i>Подробнее
                     </a>
                 </div>
